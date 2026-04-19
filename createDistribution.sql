@@ -1,5 +1,4 @@
 USE [master];
-GO
 
 -- =========================================
 -- PARAMETERS
@@ -10,16 +9,16 @@ DECLARE @SnapshotFolder NVARCHAR(4000) = '\\' + @@SERVERNAME + '\ReplData';
 DECLARE @Password NVARCHAR(255) = 'Str0ng!Pass_2026';
 
 -- =========================================
--- GET INSTANCE DEFAULT PATHS (REPLACED LOGIC)
+-- GET PATHS (FIXED CAST)
 -- =========================================
 DECLARE @DataFolder NVARCHAR(4000);
 DECLARE @LogFolder NVARCHAR(4000);
 
 SELECT 
-    @DataFolder = SERVERPROPERTY('InstanceDefaultDataPath'),
-    @LogFolder  = SERVERPROPERTY('InstanceDefaultLogPath');
+    @DataFolder = CAST(SERVERPROPERTY('InstanceDefaultDataPath') AS NVARCHAR(4000)),
+    @LogFolder  = CAST(SERVERPROPERTY('InstanceDefaultLogPath') AS NVARCHAR(4000));
 
--- Fallback if NULL (common on some installs)
+-- Fallback if NULL
 IF @DataFolder IS NULL OR @LogFolder IS NULL
 BEGIN
     SELECT 
@@ -31,7 +30,7 @@ BEGIN
         @LogFolder = LEFT(physical_name, LEN(physical_name) - CHARINDEX('\', REVERSE(physical_name)) + 1)
     FROM sys.master_files
     WHERE database_id = 1 AND type = 1;
-END
+END;
 
 -- =========================================
 -- STEP 1: ADD DISTRIBUTOR
@@ -39,23 +38,20 @@ END
 EXEC sp_adddistributor 
     @distributor = @Distributor,
     @password = @Password;
-GO
 
 -- =========================================
--- STEP 2: CREATE DISTRIBUTION DB (DYNAMIC PATHS)
+-- STEP 2: CREATE DISTRIBUTION DB
 -- =========================================
 EXEC sp_adddistributiondb 
-    @database = 'DistDB',
+    @database = @DistributionDB,
     @data_folder = @DataFolder,
-    @log_folder  = @LogFolder;
-GO
+    @log_folder = @LogFolder;
 
 -- =========================================
--- STEP 3: REGISTER PUBLISHER
+-- STEP 3: ADD PUBLISHER
 -- =========================================
 EXEC sp_adddistpublisher 
-    @publisher = @@SERVERNAME,
-    @distribution_db = 'DistDB',
-    @working_directory = '\\' + @@SERVERNAME + '\ReplData',
+    @publisher = @Distributor,
+    @distribution_db = @DistributionDB,
+    @working_directory = @SnapshotFolder,
     @security_mode = 1;
-GO
