@@ -7,37 +7,28 @@ BEGIN
 END
 GO
 
--- =========================================
--- Build server-based login names
--- =========================================
+USE ReplDB;
+GO
+
 DECLARE @DistLogin SYSNAME = @@SERVERNAME + '\repl_distribution';
 DECLARE @MergeLogin SYSNAME = @@SERVERNAME + '\repl_merge';
 
 -- =========================================
--- Create database context
+-- Create users if missing
 -- =========================================
-USE ReplDB;
-GO
-
--- =========================================
--- Create database users if missing
--- =========================================
-IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @@SERVERNAME + '\repl_distribution')
+IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @DistLogin)
 BEGIN
-    EXEC('CREATE USER [' + @@SERVERNAME + '\repl_distribution] 
-          FOR LOGIN [' + @@SERVERNAME + '\repl_distribution]');
+    EXEC('CREATE USER [' + @DistLogin + '] FOR LOGIN [' + @DistLogin + ']');
 END
 
-IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @@SERVERNAME + '\repl_merge')
+IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = @MergeLogin)
 BEGIN
-    EXEC('CREATE USER [' + @@SERVERNAME + '\repl_merge] 
-          FOR LOGIN [' + @@SERVERNAME + '\repl_merge]');
+    EXEC('CREATE USER [' + @MergeLogin + '] FOR LOGIN [' + @MergeLogin + ']');
 END
-GO
 
 -- =========================================
 -- Add db_owner role
 -- =========================================
-ALTER ROLE db_owner ADD MEMBER [$(=@@SERVERNAME)\repl_distribution];
-ALTER ROLE db_owner ADD MEMBER [$(=@@SERVERNAME)\repl_merge];
+EXEC('ALTER ROLE db_owner ADD MEMBER [' + @DistLogin + ']');
+EXEC('ALTER ROLE db_owner ADD MEMBER [' + @MergeLogin + ']');
 GO
