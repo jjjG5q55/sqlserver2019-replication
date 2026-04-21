@@ -14,7 +14,7 @@ This guide walks through the complete setup of SQL Server Transactional Replicat
 │  PUBLISHER / DISTRIBUTOR        │        │  SUBSCRIBER          │
 │  (SRVDB1)                       │        │  (SRVDB2)            │
 │                                 │        │                      │
-│  DB: ReplicationTestDB  ─────────────────│───► DB: ReplDB       │
+│  DB: ReplicationTestDB  ────────│────────│───► DB: ReplDB       │
 │  DB: DistDB (distribution)      │        │                      │
 │  Share: \\SRVDB1\ReplData       │        │                      │
 └─────────────────────────────────┘        └──────────────────────┘
