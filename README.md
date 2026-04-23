@@ -14,7 +14,7 @@ This guide walks through the complete setup of SQL Server Transactional Replicat
 │  PUBLISHER / DISTRIBUTOR        │        │  SUBSCRIBER          │
 │  (SRVDB1)                       │        │  (SRVDB2)            │
 │                                 │        │                      │
-│  DB: ReplicationTestDB  ────────│────────│───► DB: ReplDB       │
+│  DB: ReplicationTestDB  ──────────────►  DB: ReplDB            │
 │  DB: DistDB (distribution)      │        │                      │
 │  Share: \\SRVDB1\ReplData       │        │                      │
 └─────────────────────────────────┘        └──────────────────────┘
@@ -51,12 +51,12 @@ These values appear across multiple scripts. Decide on them before you start and
 | Subscriber database name | `ReplDB` | `createRepldb.sql`, `createSub.sql` |
 | Publication name | `RepTest_Pub` | `createPub.sql`, `createSub.sql` |
 | SMB share name | `ReplData` | `addPermisions2Repldata.ps1` |
-| SQL Server version folder | `MSSQL15.MSSQLSERVER` | `addPermisions2Repldata.ps1` |
+| SQL Server repldata path | Auto-detected from registry | `addPermisions2Repldata.ps1` |
 | Agent accounts password | `Poste@2025` | `createUsers_pub.ps1`, `createUser_sub.ps1`, `createPub.sql`, `createSub.sql` |
 | Distributor admin password | `Str0ng!Pass_2026` | `createDistribution.sql` |
 | Subscriber SA login | `sa` | `createSub.sql` |
 | Subscriber SA password | `P@ssw0rd` | `createSub.sql` |
-| Account prefix (domain or server) | `@@SERVERNAME` (auto) | `addNewLogins2sql.sql`, `addNewLogin2sql_sub.sql`, `addDbowner.sql` |
+| Account prefix (domain or server) | `SERVERPROPERTY('MachineName')` (auto) | `addNewLogins2sql.sql`, `addNewLogin2sql_sub.sql`, `addDbowner.sql` |
 
 ---
 
@@ -185,7 +185,7 @@ Creates the `ReplData` SMB share and applies both SMB and NTFS permissions per a
 
 | Variable | Default | Description |
 |---|---|---|
-| `$path` | `C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\repldata` | Physical path to the repldata folder. **Update `MSSQL15` to match your SQL Server version** (`MSSQL15` = SQL 2019, `MSSQL16` = SQL 2022, `MSSQL14` = SQL 2017) |
+| `$path` | Auto-detected from registry | Resolved via `HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL`. Only set manually if auto-detection fails. |
 | `$shareName` | `ReplData` | SMB share name — must match `@SnapshotFolder` in `createDistribution.sql` |
 | `$repl_distribution` | `repl_distribution` | Account granted Read access on the share |
 | `$repl_merge` | `repl_merge` | Account granted Read access on the share |
@@ -239,7 +239,7 @@ Adds all 4 replication accounts as `db_owner` in both the distribution database 
 
 | Variable | Default | Description |
 |---|---|---|
-| `@prefix` | `@@SERVERNAME` | Server or domain prefix for account names. Change to `'MYDOMAIN'` if using domain accounts |
+| `@prefix` | `SERVERPROPERTY('MachineName')` (auto) | Machine name auto-detected. Change to `'MYDOMAIN'` if using domain accounts |
 | `@databases` table | `distribution`, `ReplicationTestDB` | **Replace `ReplicationTestDB`** with your actual publisher database name if you skipped Step 6 |
 | `@accounts` table | 4 agent accounts | Add or remove accounts as needed |
 
@@ -261,10 +261,10 @@ Enables publishing, creates the publication `RepTest_Pub`, configures Snapshot a
 
 | Variable | Default | Description |
 |---|---|---|
-| `USE [ReplicationTestDB]` at top | `ReplicationTestDB` | **Change to your actual publisher database name** if you skipped Step 6 |
+| `@PublisherDB` | `ReplicationTestDB` | **Change** to your actual publisher database name if you skipped Step 6 |
 | `@Publication` | `RepTest_Pub` | Publication name — must match `@Publication` in `createSub.sql` |
-| `@SnapshotLogin` | `@@SERVERNAME\repl_snapshot` | Snapshot Agent Windows account — auto-built from server name |
-| `@LogReaderLogin` | `@@SERVERNAME\repl_logreader` | Log Reader Agent Windows account — auto-built from server name |
+| `@SnapshotLogin` | `MachineName\repl_snapshot` | Auto-detected from machine name — do not change |
+| `@LogReaderLogin` | `MachineName\repl_logreader` | Auto-detected from machine name — do not change |
 | `@Password` | `Poste@2025` | Password for both agent accounts above |
 
 > ⚠️ **Wait for the Snapshot Agent to complete successfully** before moving to the Subscriber steps. Monitor progress in SSMS → Replication Monitor → Snapshot Agent status column.
@@ -327,7 +327,7 @@ Creates Windows logins for `repl_distribution` and `repl_merge` on the subscribe
 
 | Variable | Default | Description |
 |---|---|---|
-| `@prefix` | `@@SERVERNAME` | Evaluated on the subscriber, so it resolves to `SRVDB2` automatically. Change to `'MYDOMAIN'` for domain accounts |
+| `@prefix` | `SERVERPROPERTY('MachineName')` (auto) | Machine name auto-detected on the subscriber. Change to `'MYDOMAIN'` for domain accounts |
 | `@accounts` table | `repl_distribution`, `repl_merge` | Add or remove accounts as needed |
 
 ---
@@ -347,8 +347,8 @@ Creates the `ReplDB` destination database if it does not exist, creates users fo
 | Variable | Default | Description |
 |---|---|---|
 | `'ReplDB'` in `DB_ID` check | `ReplDB` | **Change** to your desired subscriber database name |
-| `@DistLogin` | `@@SERVERNAME\repl_distribution` | Distribution agent account — auto-built from the subscriber server name |
-| `@MergeLogin` | `@@SERVERNAME\repl_merge` | Merge agent account — auto-built from the subscriber server name |
+| `@DistLogin` | `MachineName\repl_distribution` | Auto-detected from subscriber machine name — do not change |
+| `@MergeLogin` | `MachineName\repl_merge` | Auto-detected from subscriber machine name — do not change |
 
 ---
 
@@ -368,15 +368,15 @@ Creates a Push Subscription from the publication to the subscriber, and configur
 
 | Variable | Default | Description |
 |---|---|---|
-| `USE [ReplicationTestDB]` at top | `ReplicationTestDB` | **Change to your actual publisher database name** if you skipped Step 6 |
+| `@PublisherDB` | `ReplicationTestDB` | **Change** to your actual publisher database name if you skipped Step 6 |
 | `@Publication` | `RepTest_Pub` | Must match the publication name from Step 8 |
 | `@Subscriber` | `SRVDB2` | **Change** to your subscriber server name |
 | `@SubscriberDB` | `ReplDB` | **Change** to your subscriber database name (must match Step 12) |
-| `@DistLogin` | `@@SERVERNAME\repl_distribution` | Distribution Agent Windows account — auto-built |
+| `@DistLogin` | `MachineName\repl_distribution` | Auto-detected from machine name — do not change |
 | `@DistPassword` | `Poste@2025` | Password for the distribution agent account |
 | `@subscriber_security_mode` | `0` | `0` = SQL auth, `1` = Windows auth for the subscriber connection |
-| `@subscriber_login` | `sa` | **Change** to a least-privilege SQL login in production |
-| `@subscriber_password` | `P@ssw0rd` | **Change** to match your subscriber SQL login password |
+| `@SubLogin` | `sa` | **Change** to a least-privilege SQL login in production |
+| `@SubPassword` | `P@ssw0rd` | **Change** to match your subscriber SQL login password |
 | `@frequency_type` | `64` | `64` = run continuously — do not change for transactional replication |
 
 ---
@@ -411,9 +411,9 @@ When skipping `testPrepa.sql`, update these references in the remaining scripts 
 
 | Script | What to change |
 |---|---|
-| `addDbowner.sql` | Replace `ReplicationTestDB` in the `@databases` table |
-| `createPub.sql` | Change `USE [ReplicationTestDB]` at the top |
-| `createSub.sql` | Change `USE [ReplicationTestDB]` at the top |
+| `addDbowner.sql` | Replace `ReplicationTestDB` in the `@publisherDB` variable |
+| `createPub.sql` | Change `@PublisherDB` at the top of the script |
+| `createSub.sql` | Change `@PublisherDB` at the top of the script |
 
 Also verify your existing database meets these requirements before running Step 8:
 
@@ -441,9 +441,9 @@ Also verify your existing database meets these requirements before running Step 
 
 ### 🟡 Verify Before Running
 
-- `addPermisions2Repldata.ps1` → confirm `$path` matches your SQL Server version folder (`MSSQL14` = 2017, `MSSQL15` = 2019, `MSSQL16` = 2022).
+- `addPermisions2Repldata.ps1` → path is auto-detected from the registry. Only intervene manually if the script reports the instance was not found.
 - `addHost.ps1` → update `$IPAddress` to your actual subscriber IP before running.
-- `addDbowner.sql`, `addNewLogins2sql.sql`, `addNewLogin2sql_sub.sql` → if using domain accounts instead of local accounts, set `@prefix = 'YOURDOMAIN'` explicitly.
+- `addDbowner.sql`, `addNewLogins2sql.sql`, `addNewLogin2sql_sub.sql` → machine name is auto-detected via `SERVERPROPERTY('MachineName')`. Only change `@prefix` if using domain accounts.
 - `createSub.sql` → the `sa` account is used for the subscriber connection by default. Replace with a dedicated least-privilege SQL login in production.
 
 ### 🟢 Good to Know
