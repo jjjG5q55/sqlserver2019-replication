@@ -6,8 +6,9 @@ GO
 -- =========================================
 DECLARE @Publication SYSNAME = 'RepTest_Pub';
 
-DECLARE @SnapshotLogin SYSNAME = @@SERVERNAME + '\repl_snapshot';
-DECLARE @LogReaderLogin SYSNAME = @@SERVERNAME + '\repl_logreader';
+DECLARE @MachineName    NVARCHAR(128) = CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128));
+DECLARE @SnapshotLogin  SYSNAME = @MachineName + '\repl_snapshot';
+DECLARE @LogReaderLogin SYSNAME = @MachineName + '\repl_logreader';
 
 DECLARE @Password NVARCHAR(255) = 'Poste@2025';
 
