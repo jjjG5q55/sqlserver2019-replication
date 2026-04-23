@@ -10,8 +10,9 @@ GO
 USE ReplDB;
 GO
 
-DECLARE @DistLogin SYSNAME = @@SERVERNAME + '\repl_distribution';
-DECLARE @MergeLogin SYSNAME = @@SERVERNAME + '\repl_merge';
+DECLARE @MachineName NVARCHAR(128) = CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128));
+DECLARE @DistLogin   SYSNAME = @MachineName + '\repl_distribution';
+DECLARE @MergeLogin  SYSNAME = @MachineName + '\repl_merge';
 
 -- =========================================
 -- Create users if missing
