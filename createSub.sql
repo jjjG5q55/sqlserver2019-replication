@@ -1,9 +1,15 @@
 USE [ReplicationTestDB];
 GO
 
+-- =============================================
+-- CONFIGURATION — edit only this section
+-- =============================================
 DECLARE @Publication SYSNAME = 'RepTest_Pub';
 DECLARE @Subscriber SYSNAME = 'SRVDB2';
 DECLARE @SubscriberDB SYSNAME = 'ReplDB';
+
+DECLARE @SubLogin    SYSNAME       = 'sa';
+DECLARE @SubPassword NVARCHAR(255) = 'P@ssw0rd';
 
 DECLARE @MachineName NVARCHAR(128) = CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128));
 DECLARE @DistLogin   SYSNAME = @MachineName + '\repl_distribution';
@@ -32,10 +38,10 @@ EXEC sp_addpushsubscription_agent
     @job_login = @DistLogin,
     @job_password = @DistPassword,
 
-    -- Subscriber connection (you used sa)
+    -- Subscriber connection 
     @subscriber_security_mode = 0,
-    @subscriber_login = 'sa',
-    @subscriber_password = 'P@ssw0rd',
+    @subscriber_login = @SubLogin,
+    @subscriber_password = @SubPassword,
 
     -- Continuous execution
     @frequency_type = 64;
