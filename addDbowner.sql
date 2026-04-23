@@ -4,7 +4,7 @@ GO
 -- =========================
 -- PARAMETERS
 -- =========================
-DECLARE @prefix NVARCHAR(128) = @@SERVERNAME;
+DECLARE @prefix NVARCHAR(128) = CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128));
 -- SET @prefix = 'MYDOMAIN'; -- if needed
 
 DECLARE @databases TABLE (db SYSNAME);
