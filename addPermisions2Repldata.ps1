@@ -3,7 +3,8 @@
 # ================================
 
 # --- VARIABLES ---
-$path = "C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\repldata"
+$instanceName = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Microsoft SQL Server\Instance Names\SQL").MSSQLSERVER
+$path = "C:\Program Files\Microsoft SQL Server\$instanceName\MSSQL\repldata"
 $shareName = "ReplData"
 
 $repl_distribution = "repl_distribution"
