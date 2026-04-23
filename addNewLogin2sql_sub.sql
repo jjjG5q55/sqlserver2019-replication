@@ -2,7 +2,7 @@ USE [master];
 GO
 
 -- Replace with your domain or keep as is for local accounts
-DECLARE @prefix NVARCHAR(128) = @@SERVERNAME; 
+DECLARE @prefix NVARCHAR(128) = CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128));
 -- Example for domain: SET @prefix = 'MYDOMAIN';
 
 DECLARE @accounts TABLE (name SYSNAME);
