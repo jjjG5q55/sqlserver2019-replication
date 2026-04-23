@@ -5,7 +5,7 @@ USE [master];
 -- =========================================
 DECLARE @Distributor SYSNAME = @@SERVERNAME;
 DECLARE @DistributionDB SYSNAME = 'DistDB';
-DECLARE @SnapshotFolder NVARCHAR(4000) = '\\' + @@SERVERNAME + '\ReplData';
+DECLARE @SnapshotFolder NVARCHAR(4000) = '\\' + CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128)) + '\ReplData';
 DECLARE @Password NVARCHAR(255) = 'Str0ng!Pass_2026';
 
 -- =========================================
