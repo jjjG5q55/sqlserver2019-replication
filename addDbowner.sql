@@ -5,12 +5,14 @@ GO
 -- PARAMETERS
 -- =========================
 DECLARE @prefix NVARCHAR(128) = CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128));
+DECLARE @publisherDB SYSNAME = 'ReplicationTestDB';
+DECLARE @DistributionDB SYSNAME = 'DistDB';
 -- SET @prefix = 'MYDOMAIN'; -- if needed
 
 DECLARE @databases TABLE (db SYSNAME);
 INSERT INTO @databases VALUES
-('distribution'),
-('ReplicationTestDB');
+(@DistributionDB),
+(@publisherDB);
 
 DECLARE @accounts TABLE (name SYSNAME);
 INSERT INTO @accounts VALUES
