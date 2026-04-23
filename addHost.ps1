@@ -1,4 +1,6 @@
-# Define variables
+# =============================================
+# CONFIGURATION — edit only this section
+# =============================================
 $Hostname = "SRVDB2"
 $IPAddress = "172.29.104.60"
 $HostsPath = "$env:SystemRoot\System32\drivers\etc\hosts"
