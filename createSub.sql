@@ -7,7 +7,6 @@ DECLARE @SubscriberDB SYSNAME = 'ReplDB';
 
 DECLARE @MachineName NVARCHAR(128) = CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128));
 DECLARE @DistLogin   SYSNAME = @MachineName + '\repl_distribution';
-DECLARE @MergeLogin  SYSNAME = @MachineName + '\repl_merge';
 DECLARE @DistPassword NVARCHAR(255) = 'Poste@2025';
 
 -- =========================================
