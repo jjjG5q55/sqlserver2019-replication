@@ -1,11 +1,9 @@
-USE [ReplicationTestDB];
-GO
 
+-- USE is handled dynamically via @PublisherDB
 -- =============================================
 -- CONFIGURATION — edit only this section
 -- =============================================
 DECLARE @PublisherDB SYSNAME = 'ReplicationTestDB'; -- Change if using existing DB
-
 DECLARE @MachineName    NVARCHAR(128) = CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128));
 DECLARE @SnapshotLogin  SYSNAME = @MachineName + '\repl_snapshot';
 DECLARE @LogReaderLogin SYSNAME = @MachineName + '\repl_logreader';
@@ -16,7 +14,7 @@ DECLARE @Password NVARCHAR(255) = 'Poste@2025';
 -- STEP 1: ENABLE PUBLISHING
 -- =========================================
 EXEC sp_replicationdboption 
-    @dbname = 'ReplicationTestDB',
+    @dbname = @PublisherDB,
     @optname = 'publish',
     @value = 'true';
 
