@@ -1,10 +1,10 @@
 USE [ReplicationTestDB];
 GO
 
--- =========================================
--- PARAMETERS
--- =========================================
-DECLARE @Publication SYSNAME = 'RepTest_Pub';
+-- =============================================
+-- CONFIGURATION — edit only this section
+-- =============================================
+DECLARE @PublisherDB SYSNAME = 'ReplicationTestDB'; -- Change if using existing DB
 
 DECLARE @MachineName    NVARCHAR(128) = CAST(SERVERPROPERTY('MachineName') AS NVARCHAR(128));
 DECLARE @SnapshotLogin  SYSNAME = @MachineName + '\repl_snapshot';
