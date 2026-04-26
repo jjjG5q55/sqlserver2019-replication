@@ -29,13 +29,6 @@ EXEC sp_addsubscription
     @sync_type        = ''automatic'';';
 EXEC sp_executesql @ctx;
 
-EXEC sp_addsubscription
-    @publication = @Publication,
-    @subscriber = @Subscriber,
-    @destination_db = @SubscriberDB,
-    @subscription_type = 'Push',
-    @sync_type = 'automatic';
-
 -- =========================================
 -- CREATE DISTRIBUTION AGENT JOB
 -- (FIXED: NO distributor_security_mode here)
