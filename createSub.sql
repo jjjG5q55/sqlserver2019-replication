@@ -33,20 +33,16 @@ EXEC sp_executesql @ctx;
 -- CREATE DISTRIBUTION AGENT JOB
 -- (FIXED: NO distributor_security_mode here)
 -- =========================================
+-- REPLACE the sp_addpushsubscription_agent block with:
+DECLARE @agentCtx NVARCHAR(MAX) = 'USE ' + QUOTENAME(@PublisherDB) + ';
 EXEC sp_addpushsubscription_agent
-    @publication = @Publication,
-    @subscriber = @Subscriber,
-    @subscriber_db = @SubscriberDB,
-
-    -- Agent execution account
-    @job_login = @DistLogin,
-    @job_password = @DistPassword,
-
-    -- Subscriber connection 
+    @publication             = ''' + @Publication  + ''',
+    @subscriber              = ''' + @Subscriber   + ''',
+    @subscriber_db           = ''' + @SubscriberDB + ''',
+    @job_login               = ''' + @DistLogin    + ''',
+    @job_password            = ''' + @DistPassword + ''',
     @subscriber_security_mode = 0,
-    @subscriber_login = @SubLogin,
-    @subscriber_password = @SubPassword,
-
-    -- Continuous execution
-    @frequency_type = 64;
-GO
+    @subscriber_login        = ''' + @SubLogin     + ''',
+    @subscriber_password     = ''' + @SubPassword  + ''',
+    @frequency_type          = 64;';
+EXEC sp_executesql @agentCtx;
