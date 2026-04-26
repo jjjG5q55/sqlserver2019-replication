@@ -22,15 +22,18 @@ EXEC sp_replicationdboption
 -- =========================================
 -- STEP 2: CREATE PUBLICATION
 -- =========================================
+-- REPLACE the entire STEP 2 block:
+DECLARE @sql2 NVARCHAR(MAX) = 'USE ' + QUOTENAME(@PublisherDB) + ';
 EXEC sp_addpublication
-    @publication = @Publication,
-    @status = 'active',
-    @sync_method = 'concurrent',
-    @allow_push = 'true',
-    @allow_pull = 'true',
-    @independent_agent = 'true',
-    @immediate_sync = 'true',
-    @repl_freq = 'continuous';
+    @publication     = ''' + @Publication + ''',
+    @status          = ''active'',
+    @sync_method     = ''concurrent'',
+    @allow_push      = ''true'',
+    @allow_pull      = ''true'',
+    @independent_agent = ''true'',
+    @immediate_sync  = ''true'',
+    @repl_freq       = ''continuous'';';
+EXEC sp_executesql @sql2;
 
 -- =========================================
 -- STEP 3: SNAPSHOT AGENT (WITH YOUR ACCOUNT)
@@ -51,8 +54,7 @@ EXEC sp_changelogreader_agent
 -- =========================================
 -- STEP 5: ADD ALL TABLES
 -- =========================================
-DECLARE @sql NVARCHAR(MAX) = N'';
-
+DECLARE @sql NVARCHAR(MAX) = N'USE ' + QUOTENAME(@PublisherDB) + ';';
 SELECT @sql = @sql + '
 EXEC sp_addarticle
     @publication = ''' + @Publication + ''',
