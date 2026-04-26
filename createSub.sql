@@ -5,6 +5,8 @@
 DECLARE @Publication SYSNAME = 'RepTest_Pub';
 DECLARE @Subscriber SYSNAME = 'SRVDB2';
 DECLARE @SubscriberDB SYSNAME = 'ReplDB';
+-- ADD to config block:
+DECLARE @PublisherDB SYSNAME = 'ReplicationTestDB'; -- Change if using existing DB
 
 DECLARE @SubLogin    SYSNAME       = 'sa';
 DECLARE @SubPassword NVARCHAR(255) = 'P@ssw0rd';
@@ -16,6 +18,17 @@ DECLARE @DistPassword NVARCHAR(255) = 'Poste@2025';
 -- =========================================
 -- CREATE PUSH SUBSCRIPTION
 -- =========================================
+
+-- ADD before sp_addsubscription:
+DECLARE @ctx NVARCHAR(MAX) = 'USE ' + QUOTENAME(@PublisherDB) + ';
+EXEC sp_addsubscription
+    @publication      = ''' + @Publication + ''',
+    @subscriber       = ''' + @Subscriber + ''',
+    @destination_db   = ''' + @SubscriberDB + ''',
+    @subscription_type = ''Push'',
+    @sync_type        = ''automatic'';';
+EXEC sp_executesql @ctx;
+
 EXEC sp_addsubscription
     @publication = @Publication,
     @subscriber = @Subscriber,
