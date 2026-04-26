@@ -1,5 +1,3 @@
-USE [ReplicationTestDB];
-GO
 
 -- =============================================
 -- CONFIGURATION — edit only this section
