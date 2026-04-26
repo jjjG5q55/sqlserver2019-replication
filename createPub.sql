@@ -54,18 +54,20 @@ EXEC sp_changelogreader_agent
 -- =========================================
 -- STEP 5: ADD ALL TABLES
 -- =========================================
-DECLARE @sql NVARCHAR(MAX) = N'USE ' + QUOTENAME(@PublisherDB) + ';';
-SELECT @sql = @sql + '
+-- REPLACE the entire STEP 5 block with:
+DECLARE @sql NVARCHAR(MAX);
+SET @sql = 'USE ' + QUOTENAME(@PublisherDB) + ';
+DECLARE @s NVARCHAR(MAX) = N'''';
+SELECT @s = @s + ''
 EXEC sp_addarticle
-    @publication = ''' + @Publication + ''',
-    @article = ''' + t.name + ''',
-    @source_owner = ''dbo'',
-    @source_object = ''' + t.name + ''',
-    @type = ''logbased'';
-'
-FROM sys.tables t
-WHERE is_ms_shipped = 0;
-
+    @publication = ''''' + @Publication + ''''',
+    @article = '''''' + name + '''''',
+    @source_owner = ''''dbo'''',
+    @source_object = '''''' + name + '''''',
+    @type = ''''logbased'''';
+''
+FROM sys.tables WHERE is_ms_shipped = 0;
+EXEC sp_executesql @s;';
 EXEC sp_executesql @sql;
 
 -- =========================================
