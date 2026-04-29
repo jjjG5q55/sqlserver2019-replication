@@ -3,10 +3,11 @@
 > Windows | MSSQL 2022 | Push Subscription
 
 ---
-
 helpful links 
 https://learn.microsoft.com/en-us/sql/relational-databases/replication/tutorial-preparing-the-server-for-replication?view=sql-server-ver17\n
+\n
 https://learn.microsoft.com/en-us/sql/relational-databases/replication/tutorial-replicating-data-between-continuously-connected-servers?view=sql-server-ver17\n
+\n
 https://learn.microsoft.com/en-us/sql/relational-databases/replication/sql-server-replication?view=sql-server-ver17\n
 ---
 ## Architecture
